@@ -237,10 +237,16 @@ def get_whoop(most_recent=False):
        # get_button()
         tod=next_page(tod)
         num+=1
-    print(new_whoop.columns, whoo.columns)
+    print(new_whoop.shape, whoo.shape)
     all_whoop=pd.concat([new_whoop,whoo])
-    all_whoop.drop_duplicates('date_string',inplace=True)
     wks_2.set_dataframe(all_whoop,(1,1))
+
+    fix_df=wks_2.get_as_df(empty_value=np.nan)
+    fix_df.dropna(how='all',inplace=True)
+    fix_df.dropna(axis=1,how='all',inplace=True)
+    fix_df.drop_duplicates('date_string',inplace=True)
+    wks_2.set_dataframe(fix_df,(1,1))
+
 
 get_strava()
 get_whoop()
