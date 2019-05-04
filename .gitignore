@@ -1,0 +1,5 @@
+## Ignore my login info :)
+*.json
+
+## ignore checkpoints
+*.ipynb_checkpoints
