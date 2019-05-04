@@ -34,6 +34,7 @@ whoo=wks_2.get_as_df(empty_value=np.nan)
 whoo.dropna(how='all',inplace=True)
 whoo.dropna(axis=1,how='all',inplace=True)
 
+wks_3=sh[2]
 
 def get_strava(last_date=False):
     ## Getting log in info
@@ -93,7 +94,20 @@ def get_strava(last_date=False):
         dicts[n]=new_dict
 
     index=list(dicts.keys())
-    new_acts=pd.DataFrame([dicts[key] for key in index],index=index)
+    strava=pd.DataFrame([dicts[key] for key in index],index=index)
+    mult_mile=0.000621371
+    strava['miles']=strava.distance*mult_mile
+    strava['race']=strava.workout_type.apply(lambda x: 1 if x in [1.0,11.0] else 0 )
+    strava['date_string']=strava.start_date.apply(lambda x: x[:10])
+    strava['moving_minutes']=strava.moving_time/60
+    strava['elapsed_minutes']=strava.elapsed_time/60
+    strava['rest']=strava.elapsed_minutes-strava.moving_minutes
+    ## average speed is in meters/second - 2.237 to multiply to mph
+    strava['avg_mph']=strava.average_speed*2.237
+    strava['time_since_last_act']=(pd.to_datetime(strava.start_date)-pd.to_datetime(strava.start_date.shift(-1))).astype('timedelta64[h]')
+    strava.start_date=pd.to_datetime(strava.start_date)
+    strava.sort_values('start_date',inplace=True)
+    strava['order']=strava.groupby('date_string').start_date.rank()
     if len(strav)==0:
         wks_1.set_dataframe(new_acts,(1,1))
     else:
@@ -246,6 +260,55 @@ def get_whoop(most_recent=False):
     fix_df.dropna(axis=1,how='all',inplace=True)
     fix_df.drop_duplicates('date_string',inplace=True)
     wks_2.set_dataframe(fix_df,(1,1))
+    
+    all_whoop['recovery']=all_whoop['recovery'].astype(str).apply(lambda x: np.nan if '%' not in x else float(x[:len(x)-1])/100)
+    all_whoop['sleep_perf']=all_whoop['sleep_perf'].astype(str).apply(lambda x: np.nan if '-' in x or "na" in x else float(x[:len(x)-1])/100)
+    all_whoop['rec_color']=all_whoop.recovery.apply(lambda x: 'red' if x<.34 else ('yellow' if x<.67 else ('none' if np.isnan(x) else 'green') ))
+    all_whoop.strain=all_whoop.strain.apply(lambda x: float(x) if x!="---" else 0)
+    def time_to_dec(t):
+        if ":" in t:
+            hr=float(t[:t.find(':')])
+            m=float(t[t.find(':')+1:])/60
+            return hr+m
+        else:
+            return np.nan
+    all_whoop.sleep=all_whoop.sleep.astype(str).apply(time_to_dec)
+    all_whoop.rec_sleep=all_whoop.rec_sleep.astype(str).apply(time_to_dec)
+    all_whoop['sleep_addition']=all_whoop.rec_sleep-7.75
+    all_whoop['pday_rec']=all_whoop['recovery'].shift(-1)
+    all_whoop['pday_rec_col']=all_whoop['rec_color'].shift(-1)
+    for n in range(1,4):
+        act_num="activity_{}_score".format(n)
+        all_whoop[act_num]=all_whoop[act_num].apply(lambda x: np.nan if x=='null' else x)
+    all_whoop['activity_total']=all_whoop[['activity_1_score','activity_2_score','activity_3_score']].apply(lambda x: sum([0 if np.isnan(y) else 1 for y in x ]),axis=1 )
+    all_whoop['pday_acts']=all_whoop['activity_total'].shift(-1)
+    all_whoop['pday_strain']=all_whoop['strain'].shift(-1)
+    all_whoop['pday_sleep']=all_whoop.sleep.shift(-1)
+    all_whoop['pday_sleep_perf']=all_whoop.sleep_perf.shift(-1)
+    all_whoop['rolling_prev_2']=all_whoop.pday_sleep.rolling(2).mean()
+    all_whoop['prev_strain_rec_gap']=all_whoop.pday_strain/all_whoop.pday_strain.max()-all_whoop.pday_rec
+    
+    act_1=all_whoop[['date','activity_1','activity_1_score']]
+    act_1.columns=['date','activity','score']
+    act_1['order']=1
+
+    act_2=all_whoop[['date','activity_2','activity_2_score']]
+    act_2.columns=['date','activity','score']
+    act_2['order']=2
+    act_2.dropna(inplace=True)
+
+    act_3=all_whoop[['date','activity_3','activity_3_score']]
+    act_3.columns=['date','activity','score']
+    act_3['order']=3
+    act_3.dropna(inplace=True)
+
+    full_whoop=pd.concat([act_1,act_2,act_3])
+    full_desc=whoop.drop(['activity_1','activity_2','activity_3','activity_1_score','activity_2_score','activity_3_score'],
+                       axis=1)
+    whoop_df=full_desc.merge(full_whoop, how ='left',left_on='date',right_on='date')
+    whoop_df.head()
+    wks_2.set_dataframe(whoop_df,(1,1))
+
 
 
 get_strava()
