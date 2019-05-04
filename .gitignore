@@ -3,3 +3,6 @@
 
 ## ignore checkpoints
 *.ipynb_checkpoints
+
+## ignoring the swagger client
+swagger_client/

@@ -109,9 +109,9 @@ def get_strava(last_date=False):
     strava.sort_values('start_date',inplace=True)
     strava['order']=strava.groupby('date_string').start_date.rank()
     if len(strav)==0:
-        wks_1.set_dataframe(new_acts,(1,1))
+        wks_1.set_dataframe(strava,(1,1))
     else:
-        all_acts=pd.concat([new_acts,strav])
+        all_acts=pd.concat([strava,strav])
         all_acts.drop_duplicates(['id'],keep='first',inplace=True)
         wks_1.set_dataframe(all_acts,(1,1))
 
@@ -303,7 +303,7 @@ def get_whoop(most_recent=False):
     act_3.dropna(inplace=True)
 
     full_whoop=pd.concat([act_1,act_2,act_3])
-    full_desc=whoop.drop(['activity_1','activity_2','activity_3','activity_1_score','activity_2_score','activity_3_score'],
+    full_desc=all_whoop.drop(['activity_1','activity_2','activity_3','activity_1_score','activity_2_score','activity_3_score'],
                        axis=1)
     whoop_df=full_desc.merge(full_whoop, how ='left',left_on='date',right_on='date')
     whoop_df.head()
