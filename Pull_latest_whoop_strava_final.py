@@ -280,7 +280,7 @@ def get_whoop(most_recent=False):
     for n in range(1,4):
         act_num="activity_{}_score".format(n)
         all_whoop[act_num]=all_whoop[act_num].apply(lambda x: np.nan if x=='null' else x)
-    all_whoop['activity_total']=all_whoop[['activity_1_score','activity_2_score','activity_3_score']].apply(lambda x: sum([0 if np.isnan(y) else 1 for y in x ]),axis=1 )
+    all_whoop['activity_total']=all_whoop[['activity_1_score','activity_2_score','activity_3_score']].apply(lambda x: sum([0 if y=='null' else (0 if np.isnan(y) else 1) for y in x ]),axis=1 )
     all_whoop['pday_acts']=all_whoop['activity_total'].shift(-1)
     all_whoop['pday_strain']=all_whoop['strain'].shift(-1)
     all_whoop['pday_sleep']=all_whoop.sleep.shift(-1)
