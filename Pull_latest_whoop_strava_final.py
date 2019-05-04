@@ -261,6 +261,7 @@ def get_whoop(most_recent=False):
     fix_df.drop_duplicates('date_string',inplace=True)
     wks_2.set_dataframe(fix_df,(1,1))
     
+    all_whoop=fix_df.copy(deep=True)
     all_whoop['recovery']=all_whoop['recovery'].astype(str).apply(lambda x: np.nan if '%' not in x else float(x[:len(x)-1])/100)
     all_whoop['sleep_perf']=all_whoop['sleep_perf'].astype(str).apply(lambda x: np.nan if '-' in x or "na" in x else float(x[:len(x)-1])/100)
     all_whoop['rec_color']=all_whoop.recovery.apply(lambda x: 'red' if x<.34 else ('yellow' if x<.67 else ('none' if np.isnan(x) else 'green') ))
