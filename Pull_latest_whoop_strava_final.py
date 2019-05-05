@@ -308,7 +308,8 @@ def get_whoop(most_recent=False):
                        axis=1)
     whoop_df=full_desc.merge(full_whoop, how ='left',left_on='date',right_on='date')
     whoop_df.head()
-    wks_2.set_dataframe(whoop_df,(1,1))
+    
+    wks_3.set_dataframe(whoop_df,(1,1))
 
 
 
