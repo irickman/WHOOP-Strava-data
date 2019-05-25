@@ -1,8 +1,10 @@
 ## Ignore my login info :)
-*.json
+**.json
 
 ## ignore checkpoints
-*.ipynb_checkpoints
+**.ipynb_checkpoints
+.ipynb_checkpoints/
 
 ## ignoring the swagger client
 swagger_client/
+
