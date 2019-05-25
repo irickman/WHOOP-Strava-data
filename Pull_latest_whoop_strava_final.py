@@ -286,7 +286,7 @@ def get_whoop(most_recent=False):
     all_whoop['pday_strain']=all_whoop['strain'].shift(-1)
     all_whoop['pday_sleep']=all_whoop.sleep.shift(-1)
     all_whoop['pday_sleep_perf']=all_whoop.sleep_perf.shift(-1)
-    all_whoop['rolling_prev_2']=all_whoop.pday_sleep.rolling(2).mean()
+    all_whoop['rolling_prev_2']=all_whoop.sort_values('date_string').pday_sleep.rolling(2).mean()
     all_whoop['prev_strain_rec_gap']=all_whoop.pday_strain/all_whoop.pday_strain.max()-all_whoop.pday_rec
     
     act_1=all_whoop[['date','activity_1','activity_1_score']]
