@@ -98,14 +98,14 @@ def get_strava(last_date=False):
     mult_mile=0.000621371
     strava['miles']=strava.distance*mult_mile
     strava['race']=strava.workout_type.apply(lambda x: 1 if x in [1.0,11.0] else 0 )
-    strava['date_string']=strava.start_date.astype(str).apply(lambda x: x[:10])
+    strava['date_string']=strava.start_date_local.astype(str).apply(lambda x: x[:10])
     strava['moving_minutes']=strava.moving_time/60
     strava['elapsed_minutes']=strava.elapsed_time/60
     strava['rest']=strava.elapsed_minutes-strava.moving_minutes
     ## average speed is in meters/second - 2.237 to multiply to mph
     strava['avg_mph']=strava.average_speed*2.237
     strava['time_since_last_act']=(pd.to_datetime(strava.start_date)-pd.to_datetime(strava.start_date.shift(-1))).astype('timedelta64[h]')
-    strava.start_date=pd.to_datetime(strava.start_date)
+    strava.start_date=pd.to_datetime(strava.start_date_local)
     strava.sort_values('start_date',inplace=True)
     strava['order']=strava.groupby('date_string').start_date.rank()
     if len(strav)==0:
