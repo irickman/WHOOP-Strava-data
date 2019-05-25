@@ -8,3 +8,5 @@
 ## ignoring the swagger client
 swagger_client/
 
+## ignoring .out
+**.out
