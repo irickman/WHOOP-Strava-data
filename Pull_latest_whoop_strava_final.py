@@ -104,7 +104,7 @@ def get_strava(last_date=False):
     strava['rest']=strava.elapsed_minutes-strava.moving_minutes
     ## average speed is in meters/second - 2.237 to multiply to mph
     strava['avg_mph']=strava.average_speed*2.237
-     strava.start_date=pd.to_datetime(strava.start_date_local)
+    strava.start_date=pd.to_datetime(strava.start_date_local)
     strava.sort_values('start_date',inplace=True)
     strava['time_since_last_act']=(pd.to_datetime(strava.start_date)-pd.to_datetime(strava.start_date.shift(1))).astype('timedelta64[h]')
     strava['order']=strava.groupby('date_string').start_date.rank()
